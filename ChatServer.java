@@ -73,7 +73,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 		if(end != -1){
 			String to = msg.substring(start, end);
 			String msg2 = msg.substring(end+1);
-			Object obj = hm.get(to);
+			Object obj = hm.get(to);//유저 이름에 붙어 있는 값이 나옴 
 			if(obj != null){
 				PrintWriter pw = (PrintWriter)obj;
 				pw.println(id + " whisphered. : " + msg2);
