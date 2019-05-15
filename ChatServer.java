@@ -92,4 +92,6 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			}
 		}
 	} // broadcast
+	
+	//'정말로 나가시겠습니까?' 와 같은거 물어보기
 }
