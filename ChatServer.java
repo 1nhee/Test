@@ -49,7 +49,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			while((line = br.readLine()) != null){
 				if(line.equals("/quit"))
 					break;
-				if(line.indexOf("/to ") == 0){
+				if(line.indexOf("/to ") == 0){ //to로 시작하는 문장, 귓속말 기능, 전체 채팅방에서 특정한 사람에게만 
 					sendmsg(line);
 				}else
 					broadcast(id + " : " + line);
