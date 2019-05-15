@@ -20,7 +20,7 @@ public class ChatServer {
 	} // main
 }
 
-class ChatThread extends Thread{
+class ChatThread extends Thread{// thread를 가져와서 start가 가능
 	private Socket sock;
 	private String id;
 	private BufferedReader br;
