@@ -12,7 +12,7 @@ public class ChatServer {
 			while(true){
 				Socket sock = server.accept();
 				ChatThread chatthread = new ChatThread(sock, hm);
-				chatthread.start();
+				chatthread.start();//run실행키는 중
 			} // while
 		}catch(Exception e){
 			System.out.println(e);
