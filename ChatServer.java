@@ -108,18 +108,27 @@ Broadcast 메소드는 모든 서버에 동일한 대화 내용이 입력되는 
 //end에는 id 뒤의 빈칸의 인데스 번호가 담긴다.
 //indexof("char", num);은 num번째의 char를 의미한다. 즉, 동일한 char의 num번째 char의 인덱스를 찾아준다.
 			int end = msg.indexOf(" ", start);
-//
+//id가 존재한다면 end는 -1이 아니므로
 			if(end != -1){
+				//to에는 id가 들어간다. 
+				//substring은 start부터 end까지의 범위로 string을 잘라서 저장한다.
 				String to = msg.substring(start, end);
+				//msg2에는 end이후 즉, 귓속말하고자 하는 대화 내용이 저장된다.
 				String msg2 = msg.substring(end+1);
-				Object obj = hm.get(to);//유저 이름에 붙어 있는 값이 나옴 
+				//to 즉, id에 해당하는 value를 HashMap으로부터 불러온다. (HashMap에는 id의 sock 즉, 소켓이 저장되어 있다.)
+				Object obj = hm.get(to);
+				//obj이 null이 아니면, 즉 id에 알맞은 value값 서버(소켓)이 있으면
 				if(obj != null){
 					PrintWriter pw = (PrintWriter)obj;
+					//id가 msg2를 속삭였다고 화면에 출력한다.
 					pw.println(id + " whisphered. : " + msg2);
+					//flush를 해주어야 남는 버퍼가 없다. 
 					pw.flush();
-				} // if
+				} // end of if
 			}
 		} // end of sendmsg
+		
+		//모든 채팅방에 
 		public void broadcast(String msg){
 			synchronized(hm){
 				Collection collection = hm.values();
