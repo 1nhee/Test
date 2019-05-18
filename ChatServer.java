@@ -4,22 +4,29 @@ import java.util.*;
 
 public class ChatServer {
 
-	public static void main(String[] args) {
+		public static void main(String[] args) {
 		try{
-			@SuppressWarnings("resource")
+//client의 요청을 받기 위해 포트 번호와 함께 ServerSocket 인스턴스를 생성하여 서버를 생성한다.
 			ServerSocket server = new ServerSocket(10001);
 			System.out.println("Waiting connection...");
-			HashMap<String, PrintWriter> hm = new HashMap<String, PrintWriter>();
-			while(true){
+//데이터의 저장을 위해 HashMap인스턴스를 생성한다.
+                			HashMap hm = new HashMap();
+	***HashMap은 while 밖, Socket은 While안에서 만드는 이유?
+서버의 역할을 하는 소켓은 각 client가 전용 소켓을 갖고 있어야 한다.(마치 각자 방이 있는 것처럼 client별로 server를 생성해준다.) 하지만, HashMap은 여러 데이터를 저장하는 곳으로 공통으로 사용될 수 있기 때문에 밖에서 한번만 생성되어도 된다. 
+               while(true){
+//while문이 도는 동안 계속하여 client의 요청을 받아들인다. (.accept)
 				Socket sock = server.accept();
+//sock인스턴스를 통해 받은 client의 요청을 chatthread에 데이터가 저장된 HashMap을 Chatthread에 넘긴다.(주소 값으로 넘김)
 				ChatThread chatthread = new ChatThread(sock, hm);
-				chatthread.start();//run실행키는 중
-			} // while
+				chatthread.start();//run을 실행시킨다.
+			} // end of while
+//에러가 나는 예외 상황 시, e가 프린트 되게 한다.
 		}catch(Exception e){
 			System.out.println(e);
 		}
-	} // main
+	} // end of main
 }
+
 
 class ChatThread extends Thread{// thread를 가져와서 start가 가능
 	private Socket sock;
