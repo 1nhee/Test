@@ -105,8 +105,10 @@ Broadcast 메소드는 모든 서버에 동일한 대화 내용이 입력되는 
 		public void sendmsg(String msg){
 //start에는 to이후 즉, id의 첫번째 인덱스가 담긴다.
 			int start = msg.indexOf(" ") +1;
-//end
+//end에는 id 뒤의 빈칸의 인데스 번호가 담긴다.
+//indexof("char", num);은 num번째의 char를 의미한다. 즉, 동일한 char의 num번째 char의 인덱스를 찾아준다.
 			int end = msg.indexOf(" ", start);
+//
 			if(end != -1){
 				String to = msg.substring(start, end);
 				String msg2 = msg.substring(end+1);
