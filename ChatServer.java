@@ -122,25 +122,29 @@ Broadcast 메소드는 모든 서버에 동일한 대화 내용이 입력되는 
 					PrintWriter pw = (PrintWriter)obj;
 					//id가 msg2를 속삭였다고 화면에 출력한다.
 					pw.println(id + " whisphered. : " + msg2);
-					//flush를 해주어야 남는 버퍼가 없다. 
+					//print후 남는 버퍼가 없도록 flush를 해준다.
 					pw.flush();
 				} // end of if
 			}
 		} // end of sendmsg
 		
-		//모든 채팅방에 
+		//모든 채팅방에 msg를 broadcast하는 메소드
 		public void broadcast(String msg){
+			//synchronized는 둘 이상의 쓰레드가 공동의 자원을 공유하는 경우, 여러 개의 쓰레드가 하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한다.
 			synchronized(hm){
 				Collection collection = hm.values();
+				//iterator는 컬렉션의 있는 데이타를 읽어 알맞는 정보를 찾아주는 인터페이스이다. iterator는 처음부터 끝까지 하나씩 순차적으로 정보를 읽을 수 밖에 없다.
 				Iterator iter = collection.iterator();
+				//iterator가 다음에 읽어 올 요소가 있으면 true를 반환한다. 만약 반환할 요소가 없다면 즉, 데이터의 끝을 넘어가면 false를 반환한다.
 				while(iter.hasNext()){
+					//iterator의 다음 값을 pw에 저장한다.
 					PrintWriter pw = (PrintWriter)iter.next();
+					//msg를 모든 방에 출력한다.
 					pw.println(msg);
+					//print후 남는 버퍼가 없도록 flush를 해준다.
 					pw.flush();
 				}
 			}
-		} // broadcast
-		
-		//'정말로 나가시겠습니까?' 와 같은거 물어보기
+		} //end of broadcast
 	}
 
