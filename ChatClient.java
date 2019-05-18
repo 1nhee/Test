@@ -75,17 +75,23 @@ public class ChatClient {
 class InputThread extends Thread{
 	private Socket sock = null;
 	private BufferedReader br = null;
+	//받아온 sock과 br의 reference를 copy하여 인스턴스를 생성시킨다.
 	public InputThread(Socket sock, BufferedReader br){
 		this.sock = sock;
 		this.br = br;
 	}
+	
 	public void run(){
 		try{
 			String line = null;
+			//server에서 보내는 데이터가 null일 때까지 읽는다.
 			while((line = br.readLine()) != null){
+				//server로부터 읽어들인 데이터를 출력한다.
 				System.out.println(line);
 			}
+		//exception한 상황일 경우 ex를 출력한다.
 		}catch(Exception ex){
+		//sock, br 모두 끝낸다. 그리고 예외 상황일 경우 ex를 출력한다.
 		}finally{
 			try{
 				if(br != null)
@@ -96,5 +102,5 @@ class InputThread extends Thread{
 					sock.close();
 			}catch(Exception ex){}
 		}
-	} // InputThread
-}
+	} 
+}//end of InputThread
