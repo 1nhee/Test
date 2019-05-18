@@ -6,9 +6,10 @@ public class ChatServer {
 
 	public static void main(String[] args) {
 		try{
+			@SuppressWarnings("resource")
 			ServerSocket server = new ServerSocket(10001);
 			System.out.println("Waiting connection...");
-			HashMap hm = new HashMap();
+			HashMap<String, PrintWriter> hm = new HashMap<String, PrintWriter>();
 			while(true){
 				Socket sock = server.accept();
 				ChatThread chatthread = new ChatThread(sock, hm);
@@ -24,9 +25,9 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 	private Socket sock;
 	private String id;
 	private BufferedReader br;
-	private HashMap hm;
+	private HashMap<String, PrintWriter> hm;
 	private boolean initFlag = false;
-	public ChatThread(Socket sock, HashMap hm){
+	public ChatThread(Socket sock, HashMap<String, PrintWriter> hm){
 		this.sock = sock;
 		this.hm = hm;
 		try{
@@ -42,14 +43,14 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 		}catch(Exception ex){
 			System.out.println(ex);
 		}
-	} // construcor
+	} // Constructor
 	public void run(){
 		try{
 			String line = null;
 			while((line = br.readLine()) != null){
 				if(line.equals("/quit"))
 					break;
-				if(line.indexOf("/to ") == 0){ //to로 시작하는 문장, 귓속말 기능, 전체 채팅방에서 특정한 사람에게만 
+				if(line.indexOf("/to ") == 0){ 
 					sendmsg(line);
 				}else
 					broadcast(id + " : " + line);
@@ -83,8 +84,8 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 	} // sendmsg
 	public void broadcast(String msg){
 		synchronized(hm){
-			Collection collection = hm.values();
-			Iterator iter = collection.iterator();
+			Collection<PrintWriter> collection = hm.values();
+			Iterator<PrintWriter> iter = collection.iterator();
 			while(iter.hasNext()){
 				PrintWriter pw = (PrintWriter)iter.next();
 				pw.println(msg);
@@ -92,6 +93,4 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			}
 		}
 	} // broadcast
-	
-	//'정말로 나가시겠습니까?' 와 같은거 물어보기
 }
