@@ -23,7 +23,7 @@ public class ChatClient {
 			//server로 아웃풋 값 내보내기
 			//PrintWriter 클래스는 주어진 데이터를 문자 출력으로 바꾸어 주는 것이다. 그러므로, getOutputStream으로부터 return된 byte 단위의 데이터를 OutputStream으로 내보낸다.
 			pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
-			//server로부터 입력 값 받기
+			//server로부터 입력 값(서버가 보낸 ) 받기
 			//getInputStream은 return 값이 byte이다. 그러므로, 이를 문자 입력 스트림인InputstreamReader에 넣어주어byte를 인풋 값으로 변환시켜준다.(구글링으로는 int로 바꿔준다고 한다.) 그리고, buffered reader로 감싸서 하나씩 읽어내는 것이 아닌 일정 데이터가 쌓이면 읽어내어 효율적으로 데이터를 읽어들인다. id, 대화 내용 등 앞으로 사용자로의 입력 값을 읽어 들일 때에는 
 			br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 			BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
