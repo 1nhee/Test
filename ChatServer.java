@@ -27,7 +27,7 @@ public class ChatServer {
 			System.out.println(e);
 		}
 	} // end of main
-}
+}//end of ChatServer
 
 
 class ChatThread extends Thread{// thread를 가져와서 start가 가능
@@ -36,13 +36,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 	private BufferedReader br;
 	private HashMap<String, PrintWriter> hm;
 	private boolean initFlag = false;
-	class ChatThread extends Thread{
-	private Socket sock;
-	private String id;
-	private BufferedReader br;
-	private HashMap hm;
-	private boolean initFlag = false;
-
+	
 	public ChatThread(Socket sock, HashMap hm){
 		//reference 즉, 주소 값을 copy하는 방식으로 인스턴스 생성
 		this.sock = sock;
