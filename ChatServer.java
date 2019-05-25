@@ -1,6 +1,9 @@
 import java.net.*;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 
 public class ChatServer {
 
@@ -13,7 +16,7 @@ public class ChatServer {
 			//데이터의 저장을 위해 HashMap인스턴스를 생성한다.
 			//***HashMap은 while 밖, Socket은 While안에서 만드는 이유?
 			//서버의 역할을 하는 소켓은 각 client가 전용 소켓을 갖고 있어야 한다.(마치 각자 방이 있는 것처럼 client별로 server를 생성해준다.) 하지만, HashMap은 여러 데이터를 저장하는 곳으로 공통으로 사용될 수 있기 때문에 밖에서 한번만 생성되어도 된다. 
-                	HashMap hm = new HashMap();
+            HashMap<String, PrintWriter> hm = new HashMap<String, PrintWriter>();
 	
                while(true){
 			//while문이 도는 동안 계속하여 client의 요청을 받아들인다. (.accept)
@@ -33,11 +36,12 @@ public class ChatServer {
 class ChatThread extends Thread{// thread를 가져와서 start가 가능
 	private Socket sock;
 	private String id;
+	private String id_myself;
 	private BufferedReader br;
 	private HashMap<String, PrintWriter> hm;
 	private boolean initFlag = false;
 	
-	public ChatThread(Socket sock, HashMap hm){
+	public ChatThread(Socket sock, HashMap<String, PrintWriter> hm){
 		//reference 즉, 주소 값을 copy하는 방식으로 인스턴스 생성
 		this.sock = sock;
 		this.hm = hm;
@@ -52,6 +56,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 			//br로 읽어온 데이터를 id에 넣어준다. (사용자의 id를 읽어오는 것임)
 			id = br.readLine();
+			id_myself = id;
 			broadcast(id + " entered.");
 			System.out.println("[Server] User (" + id + ") entered.");
 			
@@ -78,6 +83,8 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 					//만약 사용자가 /to를 입력하면 귓속말 메소드가 실행되어 개인적으로 메세지를 보낼 수 있다.
 					if(line.indexOf("/to ") == 0){ 
 						sendmsg(line);
+					}else if(line.indexOf("/userlist") == 0) {
+						send_userlist();
 					}else
 					//위의 두가지 경우 이외에 모든 대화 내용은 다음과 같은 형식으로 broadcast메소드로 보내진다.
 					//Broadcast 메소드는 모든 서버에 동일한 대화 내용이 입력되는 것이다.(전체 채팅을 위해)
@@ -131,22 +138,48 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			}
 		} // end of sendmsg
 		
+		public void send_userlist() {
+			Iterator<Entry<String, PrintWriter>> iterator = hm.entrySet().iterator();
+			 int numOfUsers = 0;
+			
+			while(iterator.hasNext()) {
+				Entry entry = (Entry)iterator.next();
+				Entry check = (Entry)iterator.next();
+				
+				System.out.println("In this Chat room, users are");
+				System.out.println(); 
+				if(check.getKey() != null) {
+					numOfUsers++;
+				}
+				System.out.println("userID: " + entry.getKey());
+			}//end of while
+			System.out.println("Total number of users is" + numOfUsers);
+		}//end of send_userlist
+		
 		//모든 채팅방에 msg를 broadcast하는 메소드
 		public void broadcast(String msg){
 			//synchronized는 둘 이상의 쓰레드가 공동의 자원을 공유하는 경우, 여러 개의 쓰레드가 하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한다.
 			synchronized(hm){
-				Collection collection = hm.values();
+				Collection<PrintWriter> collection = hm.values();
 				//iterator는 컬렉션의 있는 데이타를 읽어 알맞는 정보를 찾아주는 인터페이스이다. iterator는 처음부터 끝까지 하나씩 순차적으로 정보를 읽을 수 밖에 없다.
-				Iterator iter = collection.iterator();
+				Iterator<PrintWriter> iter = collection.iterator();
 				//iterator가 다음에 읽어 올 요소가 있으면 true를 반환한다. 만약 반환할 요소가 없다면 즉, 데이터의 끝을 넘어가면 false를 반환한다.
 				while(iter.hasNext()){
 					//iterator의 다음 값을 pw에 저장한다.
 					PrintWriter pw = (PrintWriter)iter.next();
-					//msg를 모든 방에 출력한다.
-					pw.println(msg);
-					//print후 남는 버퍼가 없도록 flush를 해준다.
-					pw.flush();
+					
+					//if(pw != id_myself) {
+						//3. 금지어 경고 기능 If user input bad word,
+						if(msg == "씨발" || msg == "ㅅㅂ" || msg == "존나" || msg == "엠창" || msg == "좆같다"){
+							System.out.println("You can't send bad words to others. Use good words in this chat room");
+						}else {
+							//msg를 모든 방에 출력한다.
+							pw.println(msg);
+							//print후 남는 버퍼가 없도록 flush를 해준다.
+							pw.flush();
+						}
+					//}
 				}
 			}
 		} //end of broadcast
-	}
+	}//end of class
