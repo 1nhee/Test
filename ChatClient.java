@@ -1,3 +1,5 @@
+//https://github.com/1nhee/SimpleChat.git
+	
 import java.net.*;
 import java.io.*;
 
@@ -29,9 +31,10 @@ public class ChatClient {
 				}else {
 				pw.println(line);
 				pw.flush();
-				if(line.equals("/quit")){
-					endflag = true;
-					break;
+					if(line.equals("/quit")){
+						endflag = true;
+						break;
+					}
 				}
 			}
 			System.out.println("Connection closed.");
