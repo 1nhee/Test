@@ -2,3 +2,4 @@
 /ChatServer.class
 /ChatThread.class
 /InputThread.class
+/ChatClient$InputThread.class
