@@ -171,10 +171,6 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 					PrintWriter pw = (PrintWriter)iter.next();
 					
 					//if(pw != id_myself) {
-						//3. 금지어 경고 기능 If user input bad word,
-						if(msg == "씨발" || msg == "ㅅㅂ" || msg == "존나" || msg == "엠창" || msg == "좆같다"){
-							System.out.println("You can't send bad words to others. Use good words in this chat room");
-						}else {
 							//msg를 모든 방에 출력한다.
 							pw.println(msg);
 							//print후 남는 버퍼가 없도록 flush를 해준다.
