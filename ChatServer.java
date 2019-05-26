@@ -87,11 +87,12 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 						sendmsg(line);
 					}else if(line.indexOf("/userlist") == 0) {
 						send_userlist();
-					}else
+					}else{
 					//위의 두가지 경우 이외에 모든 대화 내용은 다음과 같은 형식으로 broadcast메소드로 보내진다.
 					//Broadcast 메소드는 모든 서버에 동일한 대화 내용이 입력되는 것이다.(전체 채팅을 위해)
 						broadcast(id + " : " + line, id_myself);
 					}
+				}
 			//이외에 에러가 발생하면 ex가 출력된다.
 			}catch(Exception ex){
 				System.out.println(ex);
@@ -100,16 +101,16 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			//하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한 후에 HashMap에서 id를 지운다.
 				synchronized(hm){
 				hm.remove(id);
-			}
-			//각 채팅방에 client 즉, id가 채팅방을 나갔음을 알린다.
-			broadcast(id + " exited.");
-			try{
-			//client가 채팅방을 나갔으므로 소켓 즉, 서버를 닫는다.
-				if(sock != null)
-				sock.close();
-			//예외가 생긴 경우 ex를 실행시킨다.
-			}catch(Exception ex){}
-		}
+				}
+				//각 채팅방에 client 즉, id가 채팅방을 나갔음을 알린다.
+				broadcast(id + " exited.", id_myself);
+				try{
+				//client가 채팅방을 나갔으므로 소켓 즉, 서버를 닫는다.
+					if(sock != null)
+					sock.close();
+				//예외가 생긴 경우 ex를 실행시킨다.
+				}catch(Exception ex){}
+			}//end of final
 	} // end of run
 
 		//귓속말 기능을 실행하는 함수
@@ -127,9 +128,6 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 				String to = msg.substring(start, end);
 				//msg2에는 end이후 즉, 귓속말하고자 하는 대화 내용이 저장된다.
 				String msg2 = msg.substring(end+1);
-				if(msg2.equals("씨발") || msg2.equals("ㅆㅂ") || msg2.equals("존나") || msg2.equals("fuck") || msg2.equals("좆같다")){
-					System.out.println("You can't send bad words to others. Use good words in this chat room");
-				}else {
 				//to 즉, id에 해당하는 value를 HashMap으로부터 불러온다. (HashMap에는 id의 sock 즉, 소켓이 저장되어 있다.)
 					Object obj = hm.get(to);
 					//obj이 null이 아니면, 즉 id에 알맞은 value값 서버(소켓)이 있으면
@@ -140,27 +138,31 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 						//print후 남는 버퍼가 없도록 flush를 해준다.
 						pw.flush();
 					} // end of if
-				}//end of else
-			}
+			}//end of second if
 		} // end of sendmsg
 		
 		public void send_userlist() {
 			Iterator<Entry<String, PrintWriter>> iterator = hm.entrySet().iterator();
-			 int numOfUsers = 0;
+			int numOfUsers = 0;
 			
-			System.out.println("In this Chat room, users are");
 			System.out.println(); 
+			System.out.println("In this Chat room, users are");
 			
 			while(iterator.hasNext()) {
 				Entry entry = (Entry)iterator.next();
-				Entry check = (Entry)iterator.next();
+				PrintWriter pw = (PrintWriter)iterator.next();
 				
-				if(check.getKey() != null) {
+				if(entry.getKey() != null) {
 					numOfUsers++;
 				}
-				System.out.println("userID: " + entry.getKey());
+				
+				//msg를 모든 방에 출력한다.
+				String curr_id = "userID: " + entry.getKey();
+				
+				pw.println(curr_id);
+				//print후 남는 버퍼가 없도록 flush를 해준다.
+				pw.flush();
 			}//end of while
-			System.out.println("Total number of users is" + numOfUsers);
 		}//end of send_userlist
 		
 		//모든 채팅방에 msg를 broadcast하는 메소드
@@ -179,9 +181,8 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 							pw.println(msg);
 							//print후 남는 버퍼가 없도록 flush를 해준다.
 							pw.flush();
-						}
-					}
-				}
-			}
-		} //end of broadcast
+					}//end of if
+					}//end of while
+				}//end of sync
+			}//end of broadcast
 	}//end of class
