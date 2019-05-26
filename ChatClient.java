@@ -28,7 +28,8 @@ public class ChatClient {
 				//3. 금지어 경고 기능 If user input bad word,
 				if(line.equals("씨발") || line.equals("ㅆㅂ") || line.equals("존나") || line.equals("fuck") || line.equals("좆같다")){
 					System.out.println("You can't send bad words to others. Use good words in this chat room");
-				}else {
+				}else
+				{
 				pw.println(line);
 				pw.flush();
 					if(line.equals("/quit")){
