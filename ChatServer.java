@@ -175,14 +175,15 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 		public void broadcast(String msg, String id_myself){
 			//synchronized는 둘 이상의 쓰레드가 공동의 자원을 공유하는 경우, 여러 개의 쓰레드가 하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한다.
 			synchronized(hm){
+				PrintWriter pw_idMyself = (PrintWriter)hm.get(id_myself);
 				Collection<PrintWriter> collection = hm.values();
 				//iterator는 컬렉션의 있는 데이타를 읽어 알맞는 정보를 찾아주는 인터페이스이다. iterator는 처음부터 끝까지 하나씩 순차적으로 정보를 읽을 수 밖에 없다.
 				Iterator<PrintWriter> iter = collection.iterator();
 				//iterator가 다음에 읽어 올 요소가 있으면 true를 반환한다. 만약 반환할 요소가 없다면 즉, 데이터의 끝을 넘어가면 false를 반환한다.
 				while(iter.hasNext()){
-					PrintWriter idToSend = iter.next();
 					//iterator의 다음 값을 pw에 저장한다.
-					if(!pw.equals(id_myself)) {
+					PrintWriter pw = (PrintWriter)iter.next();
+					if(!pw.equals(pw_idMyself)) {
 							//msg를 모든 방에 출력한다.
 							pw.println(msg);
 							//print후 남는 버퍼가 없도록 flush를 해준다.
