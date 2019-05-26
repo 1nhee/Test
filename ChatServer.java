@@ -58,6 +58,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 			//br로 읽어온 데이터를 id에 넣어준다. (사용자의 id를 읽어오는 것임)
 			id = br.readLine();
+			//현재 id를 알 수 있게 저장해둔다.
 			id_myself = id;
 			broadcast(id + " entered.", id_myself);
 			System.out.println("[Server] User (" + id + ") entered.");
@@ -143,28 +144,36 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 		
 		public void send_userlist() {
 			Iterator<Entry<String, PrintWriter>> iterator = hm.entrySet().iterator();
+			
+			//현재 사용자 수를 counting할 변수 선언
 			int numOfUsers = 0;
 			
+			//id_myself의 값을 가져온다.
 			Object obj = hm.get(id_myself);
-			//obj이 null이 아니면, 즉 id에 알맞은 value값 서버(소켓)이 있으면
+			//현재 id에 대한 obj 생성
 			PrintWriter pw = (PrintWriter)obj;
-			//id가 msg2를 속삭였다고 화면에 출력한다.
+			
+			//userlist를 출력하기 전에 공백 생성
 			pw.println(" ");
 			
 			while(iterator.hasNext()) {
 				Entry entry = (Entry)iterator.next();
 				
+				//hm에 대한 iterator를 통해 총 몇명의 사용자가 hashmap안에 들어있는지 확인한다.
 				if(entry.getKey() != null) {
 					numOfUsers++;
 				}
 				
-				//msg를 모든 방에 출력한다.
+				//hashmap안에 있는 id를 불러낸다.
 				String curr_id = "userID: " + entry.getKey();
 				
+				//그리고 이를 채팅방에 출력한다.
 				pw.println(curr_id);
 				//print후 남는 버퍼가 없도록 flush를 해준다.
 				//pw.flush();
 			}//end of while
+			
+			//최종적으로 현재 채팅방에 있는 인원의 수를 출력한다. 
 			String final_number = "In this chat room, Total chat client is " + numOfUsers;
 			pw.println(final_number);
 			//print후 남는 버퍼가 없도록 flush를 해준다.
@@ -175,6 +184,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 		public void broadcast(String msg, String id_myself){
 			//synchronized는 둘 이상의 쓰레드가 공동의 자원을 공유하는 경우, 여러 개의 쓰레드가 하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한다.
 			synchronized(hm){
+				//현재 자신의 id의 pw를 생성한다.
 				PrintWriter pw_idMyself = (PrintWriter)hm.get(id_myself);
 				Collection<PrintWriter> collection = hm.values();
 				//iterator는 컬렉션의 있는 데이타를 읽어 알맞는 정보를 찾아주는 인터페이스이다. iterator는 처음부터 끝까지 하나씩 순차적으로 정보를 읽을 수 밖에 없다.
@@ -183,6 +193,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 				while(iter.hasNext()){
 					//iterator의 다음 값을 pw에 저장한다.
 					PrintWriter pw = (PrintWriter)iter.next();
+					//만약 현재 id의 pw와 iter되는 현재의 pw가 같으면 출력되지 않게한다. (broadcast가 되게 한다.)
 					if(!pw.equals(pw_idMyself)) {
 							//msg를 모든 방에 출력한다.
 							pw.println(msg);
