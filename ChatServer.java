@@ -180,10 +180,9 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 				Iterator<PrintWriter> iter = collection.iterator();
 				//iterator가 다음에 읽어 올 요소가 있으면 true를 반환한다. 만약 반환할 요소가 없다면 즉, 데이터의 끝을 넘어가면 false를 반환한다.
 				while(iter.hasNext()){
-					Entry entry = (Entry)iter.next();
+					PrintWriter idToSend = iter.next();
 					//iterator의 다음 값을 pw에 저장한다.
-					PrintWriter pw = (PrintWriter)iter.next();
-					if(!entry.equals(id_myself)) {
+					if(!pw.equals(id_myself)) {
 							//msg를 모든 방에 출력한다.
 							pw.println(msg);
 							//print후 남는 버퍼가 없도록 flush를 해준다.
