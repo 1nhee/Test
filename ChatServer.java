@@ -145,12 +145,14 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			Iterator<Entry<String, PrintWriter>> iterator = hm.entrySet().iterator();
 			int numOfUsers = 0;
 			
-			System.out.println(); 
-			System.out.println("In this Chat room, users are");
+			Object obj = hm.get(id_myself);
+			//obj이 null이 아니면, 즉 id에 알맞은 value값 서버(소켓)이 있으면
+			PrintWriter pw = (PrintWriter)obj;
+			//id가 msg2를 속삭였다고 화면에 출력한다.
+			pw.println(" ");
 			
 			while(iterator.hasNext()) {
 				Entry entry = (Entry)iterator.next();
-				PrintWriter pw = (PrintWriter)iterator.next();
 				
 				if(entry.getKey() != null) {
 					numOfUsers++;
@@ -161,8 +163,12 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 				
 				pw.println(curr_id);
 				//print후 남는 버퍼가 없도록 flush를 해준다.
-				pw.flush();
+				//pw.flush();
 			}//end of while
+			String final_number = "In this chat room, Total chat client is " + numOfUsers;
+			pw.println(final_number);
+			//print후 남는 버퍼가 없도록 flush를 해준다.
+			pw.flush();
 		}//end of send_userlist
 		
 		//모든 채팅방에 msg를 broadcast하는 메소드
@@ -174,9 +180,10 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 				Iterator<PrintWriter> iter = collection.iterator();
 				//iterator가 다음에 읽어 올 요소가 있으면 true를 반환한다. 만약 반환할 요소가 없다면 즉, 데이터의 끝을 넘어가면 false를 반환한다.
 				while(iter.hasNext()){
+					Entry entry = (Entry)iter.next();
 					//iterator의 다음 값을 pw에 저장한다.
 					PrintWriter pw = (PrintWriter)iter.next();
-					if(!pw.equals(id_myself)) {
+					if(!entry.equals(id_myself)) {
 							//msg를 모든 방에 출력한다.
 							pw.println(msg);
 							//print후 남는 버퍼가 없도록 flush를 해준다.
