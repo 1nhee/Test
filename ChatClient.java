@@ -25,14 +25,8 @@ public class ChatClient {
 			it.start();
 			String line = null;
 			while((line = keyboard.readLine()) != null){
-				//만약 사용자가 금지된 단어를 입력하면 그에 해당하는 단어가 출력되지 않고, 경고 메세지를 출력한다.
-				if(line.equals("씨발") || line.equals("ㅆㅂ") || line.equals("존나") || line.equals("fuck") || line.equals("좆같다")){
-					System.out.println("You can't send bad words to others. Use good words in this chat room");
-				}else{
-					//
-					pw.println(line);
-					pw.flush();
-				}
+				pw.println(line);
+				pw.flush();
 				
 				if(line.equals("/quit")){
 						endflag = true;
