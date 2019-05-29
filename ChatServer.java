@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
-
+  
 public class ChatServer {
 
 	public static void main(String[] args) {
@@ -60,7 +60,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			id = br.readLine();
 			//현재 id를 알 수 있게 저장해둔다.
 			id_myself = id;
-			broadcast(id + " entered.", id_myself);
+			broadcast(id + " entered.");
 			System.out.println("[Server] User (" + id + ") entered.");
 			
 			//synchronized는 둘 이상의 쓰레드가 공동의 자원을 공유하는 경우, 여러 개의 쓰레드가 하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한다.
@@ -76,23 +76,37 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 		} // end of constructor
 
 		public void run(){
+			
+			//to check that user's input line has bad words or not
+			boolean toCheck;
+			
 			try{
 				String line = null;
 				//사용자로부터 계속하여 문장을 읽어온다.
 				while((line = br.readLine()) != null){
-					//만약 사용자가 /quit을 입력하면 사용자로부터 읽어오는 것을 멈춘다.
-					if(line.equals("/quit"))
-						break;
-					//만약 사용자가 /to를 입력하면 귓속말 메소드가 실행되어 개인적으로 메세지를 보낼 수 있다.
-					if(line.indexOf("/to ") == 0){ 
-						sendmsg(line);
-					}else if(line.indexOf("/userlist") == 0) {
-						send_userlist();
-					}else{
-					//위의 두가지 경우 이외에 모든 대화 내용은 다음과 같은 형식으로 broadcast메소드로 보내진다.
-					//Broadcast 메소드는 모든 서버에 동일한 대화 내용이 입력되는 것이다.(전체 채팅을 위해)
-						broadcast(id + " : " + line, id_myself);
-					}
+					
+					//check user's input line
+					toCheck = toCheckLine(line);
+					
+					//if user's input line doesn't have bad words, print it out
+					if (toCheck == false) {
+						//만약 사용자가 /quit을 입력하면 사용자로부터 읽어오는 것을 멈춘다.
+						if(line.equals("/quit"))
+							break;
+						//만약 사용자가 /to를 입력하면 귓속말 메소드가 실행되어 개인적으로 메세지를 보낼 수 있다.
+						if(line.indexOf("/to ") == 0){ 
+							sendmsg(line);
+						}else if(line.indexOf("/userlist") == 0) {
+							send_userlist();
+						}else{
+						//위의 두가지 경우 이외에 모든 대화 내용은 다음과 같은 형식으로 broadcast메소드로 보내진다.
+						//Broadcast 메소드는 모든 서버에 동일한 대화 내용이 입력되는 것이다.(전체 채팅을 위해)
+							broadcast(id + " : " + line);
+						}
+					//if user's input line has bad words, send a warning message to user and send nothing to other users
+					}else 
+						send_warning_msg();
+						
 				}
 			//이외에 에러가 발생하면 ex가 출력된다.
 			}catch(Exception ex){
@@ -104,7 +118,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 				hm.remove(id);
 				}
 				//각 채팅방에 client 즉, id가 채팅방을 나갔음을 알린다.
-				broadcast(id + " exited.", id_myself);
+				broadcast(id + " exited.");
 				try{
 				//client가 채팅방을 나갔으므로 소켓 즉, 서버를 닫는다.
 					if(sock != null)
@@ -181,11 +195,11 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 		}//end of send_userlist
 		
 		//모든 채팅방에 msg를 broadcast하는 메소드
-		public void broadcast(String msg, String id_myself){
+		public void broadcast(String msg){
 			//synchronized는 둘 이상의 쓰레드가 공동의 자원을 공유하는 경우, 여러 개의 쓰레드가 하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한다.
 			synchronized(hm){
 				//현재 자신의 id의 pw를 생성한다.
-				PrintWriter pw_idMyself = (PrintWriter)hm.get(id_myself);
+				PrintWriter pw_Myself = (PrintWriter)hm.get(id);
 				Collection<PrintWriter> collection = hm.values();
 				//iterator는 컬렉션의 있는 데이타를 읽어 알맞는 정보를 찾아주는 인터페이스이다. iterator는 처음부터 끝까지 하나씩 순차적으로 정보를 읽을 수 밖에 없다.
 				Iterator<PrintWriter> iter = collection.iterator();
@@ -194,7 +208,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 					//iterator의 다음 값을 pw에 저장한다.
 					PrintWriter pw = (PrintWriter)iter.next();
 					//만약 현재 id의 pw와 iter되는 현재의 pw가 같으면 출력되지 않게한다. (broadcast가 되게 한다.)
-					if(!pw.equals(pw_idMyself)) {
+					if(!pw.equals(pw_Myself)) {
 							//msg를 모든 방에 출력한다.
 							pw.println(msg);
 							//print후 남는 버퍼가 없도록 flush를 해준다.
@@ -203,4 +217,42 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 					}//end of while
 				}//end of sync
 			}//end of broadcast
+		
+		public boolean toCheckLine(String line) {
+			//make arrayList to contain bad words
+			ArrayList<String> badWords = new ArrayList<String>();
+			boolean toCheck = false;
+			
+			//add bad words to arrayList
+			badWords.add("fuck");
+			badWords.add("ㅆㅂ");
+			badWords.add("씨발");
+			badWords.add("존나");
+			badWords.add("좆같다");
+			
+			//if line has a bad word, change toCheck to true and break because it doesn't need to check till the end of arrayList
+			for (String word : badWords) {
+				if (line.indexOf(word) == 0) {
+					toCheck = true;
+					break;
+				}
+			}
+			
+			//return true/false to check that line has bad words or not
+			return toCheck;
+		}
+		
+		//send warning message to user. logic is similar with send_msg
+		public void send_warning_msg() {
+			//get user's id
+			Object obj = hm.get(id);
+			//make user's print writer
+			PrintWriter pw_Myself = (PrintWriter) obj;
+			//send a warning message
+			pw_Myself.println("You can't use bad words in this chat room!");
+			pw_Myself.flush();
+
+		}
+	}
+
 	}//end of class
