@@ -252,6 +252,6 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			pw_Myself.println("You can't use bad words in this chat room!");
 			pw_Myself.flush();
 
-		}
+		} 
 
 	}//end of class
