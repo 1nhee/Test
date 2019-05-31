@@ -1,13 +1,21 @@
 //https://github.com/1nhee/SimpleChat.git
 	
 import java.net.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.io.*;
+import java.util.Date;
 
 public class ChatClient {
 
 	public static void main(String[] args) {
 		if(args.length != 2){
-			System.out.println("Usage : java ChatClient <username> <server-ip>");
+			Calendar calendar = Calendar.getInstance();
+			Date date = calendar.getTime();
+			String today = (new SimpleDateFormat("H:mm:ss").format(date));
+			String time = "["+ today + "] ";
+			System.out.println(time + "Usage : java ChatClient <username> <server-ip>");
 			System.exit(1);
 		}
 		Socket sock = null;
@@ -33,7 +41,11 @@ public class ChatClient {
 						break;
 					}
 			}
-			System.out.println("Connection closed.");
+			Calendar calendar = Calendar.getInstance();
+			Date date = calendar.getTime();
+			String today = (new SimpleDateFormat("H:mm:ss").format(date));
+			String time = "["+ today + "] ";
+			System.out.println(time + "Connection closed.");
 		}catch(Exception ex){
 			if(!endflag)
 				System.out.println(ex);

@@ -1,11 +1,13 @@
 //https://github.com/1nhee/SimpleChat.git
 
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.Date;
   
 public class ChatServer {
 
@@ -14,7 +16,12 @@ public class ChatServer {
 			//client의 요청을 받기 위해 포트 번호와 함께 ServerSocket 인스턴스를 생성하여 서버를 생성한다.
 			ServerSocket server = new ServerSocket(10001);
 			//ServerSocket을 통해 server를 생성해주었다.
-			System.out.println("Waiting connection...");
+			Calendar calendar = Calendar.getInstance();
+			Date date = calendar.getTime();
+			String today = (new SimpleDateFormat("H:mm:ss").format(date));
+			String time = "["+ today + "] ";
+			
+			System.out.println(time + "Waiting connection...");
 			//데이터의 저장을 위해 HashMap인스턴스를 생성한다.
 			//***HashMap은 while 밖, Socket은 While안에서 만드는 이유?
 			//서버의 역할을 하는 소켓은 각 client가 전용 소켓을 갖고 있어야 한다.(마치 각자 방이 있는 것처럼 client별로 server를 생성해준다.) 하지만, HashMap은 여러 데이터를 저장하는 곳으로 공통으로 사용될 수 있기 때문에 밖에서 한번만 생성되어도 된다. 
@@ -42,6 +49,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 	private BufferedReader br;
 	private HashMap<String, PrintWriter> hm;
 	private boolean initFlag = false;
+	ArrayList<String> badWords = new ArrayList<String>();
 	
 	public ChatThread(Socket sock, HashMap<String, PrintWriter> hm){
 		//reference 즉, 주소 값을 copy하는 방식으로 인스턴스 생성
@@ -60,8 +68,20 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			id = br.readLine();
 			//현재 id를 알 수 있게 저장해둔다.
 			id_myself = id;
+			Calendar calendar = Calendar.getInstance();
+			Date date = calendar.getTime();
+			String today = (new SimpleDateFormat("H:mm:ss").format(date));
+			String time = "["+ today + "] ";
 			broadcast(id + " entered.");
-			System.out.println("[Server] User (" + id + ") entered.");
+			
+			System.out.println(time + "[Server] User (" + id + ") entered.");
+			
+			//add bad words to arrayList
+			badWords.add("fuck");
+			badWords.add("ㅆㅂ");
+			badWords.add("씨발");
+			badWords.add("존나");
+			badWords.add("좆같다");
 			
 			//synchronized는 둘 이상의 쓰레드가 공동의 자원을 공유하는 경우, 여러 개의 쓰레드가 하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한다.
 			synchronized(hm){
@@ -98,6 +118,11 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 							sendmsg(line);
 						}else if(line.indexOf("/userlist") == 0) {
 							send_userlist();
+						}else if(line.indexOf("/spamlist") == 0) {
+							spam_list();
+						}else if(line.indexOf("/addspam") == 0) {
+							
+							add_spam(line);
 						}else{
 						//위의 두가지 경우 이외에 모든 대화 내용은 다음과 같은 형식으로 broadcast메소드로 보내진다.
 						//Broadcast 메소드는 모든 서버에 동일한 대화 내용이 입력되는 것이다.(전체 채팅을 위해)
@@ -135,6 +160,10 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			//end에는 id 뒤의 빈칸의 인데스 번호가 담긴다.
 			//indexof("char", num);은 num번째의 char를 의미한다. 즉, 동일한 char의 num번째 char의 인덱스를 찾아준다.
 			int end = msg.indexOf(" ", start);
+			Calendar calendar = Calendar.getInstance();
+			Date date = calendar.getTime();
+			String today = (new SimpleDateFormat("H:mm:ss").format(date));
+			String time = "["+ today + "] ";
 			
 			//id가 존재한다면 end는 -1이 아니므로
 			if(end != -1){
@@ -149,12 +178,22 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 					if(obj != null){
 						PrintWriter pw = (PrintWriter)obj;
 						//id가 msg2를 속삭였다고 화면에 출력한다.
-						pw.println(id + " whisphered. : " + msg2);
+						pw.println(time + id + " whisphered. : " + msg2);
 						//print후 남는 버퍼가 없도록 flush를 해준다.
 						pw.flush();
 					} // end of if
 			}//end of second if
 		} // end of sendmsg
+		
+		public void add_spam(String line) {	
+			int start = line.indexOf(" ") +1;
+			//end에는 id 뒤의 빈칸의 인데스 번호가 담긴다.
+			//indexof("char", num);은 num번째의 char를 의미한다. 즉, 동일한 char의 num번째 char의 인덱스를 찾아준다.
+			int end = line.indexOf(" ", 2);
+			String msg = line.substring(end+1);
+
+			badWords.add(msg);
+		}
 		
 		public void send_userlist() {
 			Iterator<Entry<String, PrintWriter>> iterator = hm.entrySet().iterator();
@@ -167,8 +206,14 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			//현재 id에 대한 obj 생성
 			PrintWriter pw = (PrintWriter)obj;
 			
+			Calendar calendar = Calendar.getInstance();
+			Date date = calendar.getTime();
+			String today = (new SimpleDateFormat("H:mm:ss").format(date));
+			String time = "["+ today + "] ";
+			
 			//userlist를 출력하기 전에 공백 생성
 			pw.println(" ");
+			pw.println(time);
 			
 			while(iterator.hasNext()) {
 				Entry entry = (Entry)iterator.next();
@@ -194,8 +239,32 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			pw.flush();
 		}//end of send_userlist
 		
+		public void spam_list() {
+			//id_myself의 값을 가져온다.
+			Object obj = hm.get(id_myself);
+			//현재 id에 대한 obj 생성
+			PrintWriter pw = (PrintWriter)obj;
+			Calendar calendar = Calendar.getInstance();
+			Date date = calendar.getTime();
+			String today = (new SimpleDateFormat("H:mm:ss").format(date));
+			String time = "["+ today + "] ";
+			
+			//userlist를 출력하기 전에 공백 생성
+			pw.println(" ");
+			pw.println(time + "This is spam list");
+			
+			for (String word : badWords) {
+				pw.print(word + " ");
+			}
+			pw.println(" ");
+			pw.println(" ");
+			pw.flush();
+			
+		}//end of send_userlist
+		
 		//모든 채팅방에 msg를 broadcast하는 메소드
 		public void broadcast(String msg){
+			Calendar calendar = Calendar.getInstance();
 			//synchronized는 둘 이상의 쓰레드가 공동의 자원을 공유하는 경우, 여러 개의 쓰레드가 하나의 자원에 접근하려고 할 때 주어진 순간에는 오직 하나의 쓰레드만이 접근 가능하도록 한다.
 			synchronized(hm){
 				//현재 자신의 id의 pw를 생성한다.
@@ -210,7 +279,10 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 					//만약 현재 id의 pw와 iter되는 현재의 pw가 같으면 출력되지 않게한다. (broadcast가 되게 한다.)
 					if(!pw.equals(pw_Myself)) {
 							//msg를 모든 방에 출력한다.
-							pw.println(msg);
+						Date date = calendar.getTime();
+						String today = (new SimpleDateFormat("H:mm:ss").format(date));
+						String time = "["+ today + "] ";
+							pw.println(time + msg);
 							//print후 남는 버퍼가 없도록 flush를 해준다.
 							pw.flush();
 					}//end of if
@@ -220,15 +292,7 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 		
 		public boolean toCheckLine(String line) {
 			//make arrayList to contain bad words
-			ArrayList<String> badWords = new ArrayList<String>();
 			boolean toCheck = false;
-			
-			//add bad words to arrayList
-			badWords.add("fuck");
-			badWords.add("ㅆㅂ");
-			badWords.add("씨발");
-			badWords.add("존나");
-			badWords.add("좆같다");
 			
 			//if line has a bad word, change toCheck to true and break because it doesn't need to check till the end of arrayList
 			for (String word : badWords) {
@@ -249,7 +313,13 @@ class ChatThread extends Thread{// thread를 가져와서 start가 가능
 			//make user's print writer
 			PrintWriter pw_Myself = (PrintWriter) obj;
 			//send a warning message
-			pw_Myself.println("You can't use bad words in this chat room!");
+			
+			Calendar calendar = Calendar.getInstance();
+			Date date = calendar.getTime();
+			String today = (new SimpleDateFormat("H:mm:ss").format(date));
+			String time = "["+ today + "] ";
+			
+			pw_Myself.println(time + "You can't use bad words in this chat room!");
 			pw_Myself.flush();
 
 		} 
