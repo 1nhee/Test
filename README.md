@@ -14,3 +14,4 @@ Simple Chatting Program (java)
   java ChatClient \<username1> \<server--ip-address>
 ### Terminal #3
   java ChatClient \<username2> \<server--ip-address>
+# Test
